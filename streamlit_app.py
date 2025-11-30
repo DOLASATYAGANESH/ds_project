@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -221,6 +220,32 @@ st.download_button(
     mime="application/octet-stream"
 )
 
-# Footer
-st.markdown("---")
-st.caption("Notes: The app trains a quick model on numeric features present in your CSV. For production-quality estimates: (1) perform feature engineering, (2) handle missingness carefully, (3) cross-validate and tune hyperparameters, (4) persist the best model and load it at app start.")
+# ------------------------------------------------------
+# Upload and load joblib model
+# ------------------------------------------------------
+st.markdown("### Upload a model (.joblib) to open/use it")
+
+uploaded_model = st.file_uploader("Upload joblib file", type=["joblib"])
+
+if uploaded_model is not None:
+    try:
+        loaded_model = joblib.load(uploaded_model)
+        st.success("Model loaded successfully!")
+
+        st.write("### Loaded Model Details")
+        st.write(loaded_model)
+
+        # Optional test prediction
+        st.write("### Test Prediction with Loaded Model")
+        sample_test = pd.DataFrame({c: [X_all[c].median()] for c in X_all.columns})
+
+        try:
+            pred_test = loaded_model.predict(sample_test)[0]
+            st.info(f"Loaded Model Test Prediction: **{pred_test:.2f}**")
+        except Exception as e:
+            st.error(f"Unable to predict with loaded model: {e}")
+
+    except Exception as e:
+        st.error(f"Failed to open joblib file: {e}")
+
+
